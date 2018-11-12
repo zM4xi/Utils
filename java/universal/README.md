@@ -61,7 +61,7 @@ ___
         //Load From File
         json.load();
 
-        //Read Content
+        //Update/Add Content
         if(!json.exists("costsForThisInHours")) {
             json.setDouble("costsForThisInHours", 4.5);
         } else {
