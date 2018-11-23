@@ -1,6 +1,6 @@
 # Configuration.java how it works!
 
-**(Abhänigkeit von Gson, SnakeYML und Java 8 (Streams, Lambda))**
+**(Depends on Gson, SnakeYML and Java 8 (Streams, Lambda))**
 
 Simply import it into your project and start using it!
 
