@@ -1,13 +1,19 @@
 package de.idkwhoami.utils.other;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Table;
 import com.google.gson.*;
+import com.google.gson.internal.LinkedTreeMap;
+import com.google.gson.internal.bind.TypeAdapters;
 import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -23,7 +29,9 @@ public class Document {
 
     private LinkedHashMap<String, Object> data;
     private LinkedList<DocumentNode> nodes;
-    public static transient Gson GSON = new GsonBuilder().serializeNulls().setPrettyPrinting().disableHtmlEscaping().enableComplexMapKeySerialization().create();
+    public static transient Gson GSON = new GsonBuilder().serializeNulls().setPrettyPrinting().disableHtmlEscaping().enableComplexMapKeySerialization()
+            .create();
+    //region Document
 
     /**
      * Creates a new empty {@link Document} object with a default root node 'document' for internal data
@@ -80,7 +88,7 @@ public class Document {
      * @return a {@link Integer} containing the stored data found at the given key
      */
     public Integer getInteger(String key) {
-        return get(key, Integer.class);
+        return get(key, Double.class).intValue();
     }
 
     /**
@@ -88,7 +96,7 @@ public class Document {
      * @return a {@link Long} containing the stored data found at the given key
      */
     public Long getLong(String key) {
-        return get(key, Long.class);
+        return get(key, Double.class).longValue();
     }
 
     /**
@@ -96,7 +104,7 @@ public class Document {
      * @return a {@link Float} containing the stored data found at the given key
      */
     public Float getFloat(String key) {
-        return get(key, Float.class);
+        return get(key, Double.class).floatValue();
     }
 
     /**
@@ -105,6 +113,19 @@ public class Document {
      */
     public Boolean getBoolean(String key) {
         return get(key, Boolean.class);
+    }
+
+    public UUID getUUID(String key) {
+        return UUID.fromString(get(key, String.class));
+    }
+
+    /**
+     * @param key   root data key or nodeKey separated by '.'
+     * @param clazz the {@link Class<T>} the data is casted to
+     * @return a {@link Object} containing the stored data found at the given key
+     */
+    public <T> T getObject(String key, Class<T> clazz) {
+        return get(key, clazz);
     }
 
     /**
@@ -116,11 +137,38 @@ public class Document {
     }
 
     /**
-     * @param key root data key
-     * @return true if the root data layer contains the given key
+     * @param key   root data key or nodeKey separated by '.'
+     * @param array the data type that represents the {@link ArrayList<T>}
+     * @param type  the data type the {@link ArrayList} is carrying
+     * @return a {@link E} extended of an {@link ArrayList<T>} containing the stored data found at the given key
      */
-    public boolean contains(String key) {
-        return data.containsKey(key);
+    public <E extends ArrayList<T>, T> E getArrayList(String key, Class<E> array, Class<T> type) {
+        return (E) get(key, array);
+    }
+
+    /**
+     * @param key        root data key or nodeKey separated by '.'
+     * @param map        the data type that represents the {@link Map}
+     * @param keyClass   the key data type the {@link Map} is carrying
+     * @param valueClass the value data type the {@link Map} is carrying
+     * @return a {@link E} extended of an {@link Map} containing the stored data found at the given key
+     */
+    public <E extends Map<K, V>, K, V> E getMap(String key, Class<E> map, Class<K> keyClass, Class<V> valueClass) throws Exception {
+        throw new UnsupportedOperationException("This method is currently not supported");
+        //return (E) get(key, LinkedTreeMap.class); //TODO fix ClassCastException
+    }
+
+    /**
+     * @param key        root data key or nodeKey separated by '.'
+     * @param table      the data type taht represents the {@link Table}
+     * @param rowClass   the row data type the {@link Table} is carrying
+     * @param columnType the row data type the {@link Table} is carrying
+     * @param valueClass the value data type the {@link Table} is carrying
+     * @return a {@link E} extended of an {@link Table} containing the stored data found at the given key
+     */
+    public <E extends Table<R, C, V>, R, C, V> E getTable(String key, Class<E> table, Class<R> rowClass, Class<C> columnType, Class<V> valueClass) {
+        throw new UnsupportedOperationException("This method is currently not supported");
+        //return (E) get(key, table); //TODO fix ClassCastException
     }
 
     private <T> T get(String nodeKey, Class<T> clazz) {
@@ -133,6 +181,14 @@ public class Document {
                 return getRootNode(trimNodeKey(nodeKey)).get(trimParentKey(nodeKey), clazz);
             }
         }
+    }
+
+    /**
+     * @param key root data key
+     * @return true if the root data layer contains the given key
+     */
+    public boolean contains(String key) {
+        return data.containsKey(key);
     }
 
     /**
@@ -218,7 +274,6 @@ public class Document {
 
     /* DocumentNode */
 
-
     /**
      * Retrieve the node identified by the given nodeKey
      *
@@ -299,7 +354,9 @@ public class Document {
         return GSON.fromJson(json, new TypeToken<Document>() {
         }.getType());
     }
+    //endregion
 
+    //region DocumentNode
     public static class DocumentNode {
 
         private String nodeKeyPath;
@@ -406,5 +463,7 @@ public class Document {
             return nodeKey;
         }
     }
+    //endregion
+
 
 }
