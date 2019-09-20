@@ -128,6 +128,9 @@ public class DatabaseUtil {
         return null;
     }
 
+    /**
+     * Closes the active database connection
+     */
     public void closeConnection() {
         try {
             this.connection.close();
