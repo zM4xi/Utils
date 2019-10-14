@@ -12,8 +12,6 @@ public class FramedMessage {
     @Builder.Default
     private int maxRowLength = -1;
     @Builder.Default
-    private int columnAmount = 3;
-    @Builder.Default
     private Character spacingChar = ' ', wallChar = '║', topChar = '═', bottomChar = '═';
     @Builder.Default
     private Character topLeftCorner = '╔', topRightCorner = '╗', bottomLeftCorner = '╚', bottomRightCorner = '╝';
@@ -26,11 +24,11 @@ public class FramedMessage {
         int length = Collections.max(lines, Comparator.comparing(String::length)).length();
         String top = topLeftCorner + StringUtils.repeat(topChar.toString(), length + 2) + topRightCorner;
         sb.append(top).append("\n");
-        for (int i = 0; i < columnAmount; i++) {
+        for (String line : lines) {
             sb.append(wallChar).append(" ");
             if (maxRowLength == -1)
-                sb.append(StringUtils.center(lines.get(i), length, spacingChar));
-            else if (lines.get(i).length() + length < maxRowLength)
+                sb.append(StringUtils.center(line, length, spacingChar));
+            else if (line.length() + length < maxRowLength)
                 sb.append(StringUtils.repeat(" ", length));
             sb.append(" ").append(wallChar).append("\n");
         }
